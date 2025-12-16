@@ -1,0 +1,1177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e7d32">
+
+<title>경기운영 Ver.1.5</title>
+
+<style>
+/* ===============================
+   공통 변수 및 기본 스타일
+   =============================== */
+:root{--primary:#2b8f2b;--muted:#666;--bg:#f6f7f9;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;padding:12px;font-family:system-ui,-apple-system,"Noto Sans KR",Roboto,Arial;background:var(--bg);color:#111}
+
+/* ===============================
+   레이아웃 및 카드 UI
+   =============================== */
+.container{max-width:520px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.title{font-size:18px;font-weight:800}
+.madeby{font-size:13px;color:var(--muted)}
+.card{background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.04);border:1px solid rgba(15,23,42,0.03)}
+.h2{font-size:15px;margin:0 0 8px}
+.row{display:flex;gap:8px;align-items:center}
+.col{flex:1}
+
+/* ===============================
+   입력 요소 및 버튼 스타일
+   =============================== */
+input[type="text"], input[type="number"], select, textarea {padding:8px;border:1px solid #e6eef3;border-radius:8px;font-size:15px;width:100%}
+.btn{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+.small{padding:6px 8px;font-size:13px}
+
+/* ===============================
+   테이블 공통 스타일
+   =============================== */
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{padding:8px;text-align:center;border-bottom:1px solid #eef3f8;font-size:14px;vertical-align:middle}
+.notice{font-size:13px;color:var(--muted)}
+@media (max-width:520px){.row{flex-direction:row;flex-wrap:wrap;align-items:center}}
+.checkbox-cell{width:36px;text-align:center}
+.action-cell{width:100px}
+.name-cell{text-align:left;padding-left:8px;min-width:140px}
+.name-input{width:100%;border-radius:6px;padding:6px;border:1px solid #e6eef3}
+.group-box{border:1px solid #eef3f8;padding:8px;border-radius:8px;margin-bottom:8px}
+.gender-cell{display:flex;align-items:center;justify-content:center;gap:6px}
+.gender-cell select{
+  min-width:80px;
+}
+
+/* ===============================
+   회원 명부 테이블 스타일
+   =============================== */
+#memberTable td{
+  vertical-align: middle;
+}
+
+.name-input{
+  height:38px;
+}
+
+.gender-cell select{
+  height:38px;
+}
+
+.action-cell button{
+  min-width:56px;          /* 너무 좁아지지 않게 */
+  height:38px;
+  white-space: nowrap;     /* 글자 줄바꿈 금지 */
+  writing-mode: horizontal-tb; /* 세로 글자 방지 */
+  padding: 0 10px;
+}
+
+
+
+/* 회원 추가 줄: 높이 통일 */
+#inputName,
+#inputGender,
+#memberSection .btn{
+  height:44px;
+  line-height:44px;
+  padding-top:0;
+  padding-bottom:0;
+}
+
+/* [조편성] 방식 가로 정렬 */
+.mode-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.mode-label{
+  white-space:nowrap;
+}
+
+.mode-select{
+  width:110px;
+}
+
+/* [회원명부] 성별 가로 표시 */
+th{
+  writing-mode: horizontal-tb;
+  white-space:nowrap;
+}
+
+/* 공통 입력요소 높이 통일 */
+input[type="text"],
+input[type="number"],
+select,
+button{
+  height:40px;
+  line-height:40px;
+}
+
+/* 버튼 스타일 정돈 */
+.btn{
+  font-size:14px;
+  letter-spacing:-0.2px;
+}
+
+.btn.ghost{
+  background:#fff;
+}
+
+/* 카드 간격 약간 여유 */
+.card{
+  margin-bottom:14px;
+}
+
+/* 섹션 제목 강조 */
+.h2{
+  font-size:16px;
+  font-weight:800;
+  border-left:4px solid var(--primary);
+  padding-left:8px;
+}
+
+/* 표 헤더 정리 */
+.table th{
+  background:#f2f4f7;
+  font-weight:700;
+}
+
+/* 표 행 hover */
+.table tbody tr:hover{
+  background:#f8fafc;
+}
+
+/* 이름 입력칸 가독성 */
+.name-input{
+  font-size:14px;
+}
+
+/* 성별 셀 중앙 고정 */
+.gender-cell{
+  justify-content:center;
+}
+
+/* 삭제 버튼 정리 */
+.action-cell button{
+  border-radius:8px;
+}
+
+/* 조편성 결과 리스트 정리 */
+.group-box ul{
+  margin:6px 0 0;
+}
+
+.group-box li{
+  margin-bottom:4px;
+}
+
+/* 타수 입력 줄 간격 */
+#scoreInputs .group-box > div{
+  margin-bottom:6px;
+}
+
+/* ===============================
+   순위표 영역 스타일
+   =============================== */
+
+/* 순위표 테이블 */
+#rankingArea table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+
+#rankingArea th,
+#rankingArea td{
+  border-bottom:1px solid #eaeef3;
+  padding:6px;
+}
+
+/* 순위표 이름 왼쪽 정렬 */
+#rankingArea td:nth-child(2){
+  text-align:left;
+  padding-left:8px;
+}
+
+/* ===============================
+   모바일 대응
+   =============================== */
+@media (max-width:420px){
+  .row{
+    gap:6px;
+  }
+  .btn{
+    padding:0 8px;
+    font-size:13px;
+  }
+}
+
+/* 색상 톤 업그레이드 */
+:root{
+  --primary:#237a23;        /* 조금 더 차분한 녹색 */
+  --primary-soft:#e9f4ea;   /* 연한 포인트 배경 */
+}
+
+/* 주요 버튼 강조 */
+.btn{
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+.btn:active{
+  transform:translateY(1px);
+}
+
+/* 보조 버튼은 시각적 무게 감소 */
+.btn.ghost{
+  color:#237a23;
+  border-color:#cfe6d1;
+}
+
+/* ==============================
+   회원 이름 입력란 가독성 강화
+   ============================== */
+
+.name-input{
+  background:#fff;
+  border:1.5px solid #d6e2da;
+  font-size:15px;
+  font-weight:600;
+  color:#111;
+  letter-spacing:-0.2px;
+}
+
+.name-input::placeholder{
+  color:#9aa5a0;
+  font-weight:500;
+}
+
+/* 포커스 시 확실한 강조 */
+.name-input:focus{
+  outline:none;
+  border-color:var(--primary);
+  background:var(--primary-soft);
+  box-shadow:0 0 0 3px rgba(35,122,35,.15);
+}
+
+/* 회원 추가 입력 줄 전체 정리 */
+#memberSection .row input,
+#memberSection .row select{
+  transition:all .15s ease;
+}
+
+/* 이름 셀 안 입력칸 좌우 여백 확보 */
+.name-cell{
+  padding-left:6px;
+  padding-right:6px;
+}
+
+/* 표 안에서도 이름 입력이 튀지 않게 */
+#memberTable .name-input{
+  background:#fdfefe;
+}
+
+/* 전체 폰트 렌더링 안정화 */
+body{
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 카드 내부 여백 균형 */
+.card{
+  padding:14px 14px 16px;
+}
+
+/* 섹션 제목과 내용 간 간격 */
+.h2{
+  margin-bottom:10px;
+}
+
+/* 입력 + 버튼 행 정돈 */
+.row{
+  margin-bottom:6px;
+}
+
+/* input, select 시각적 통일 */
+input[type="text"],
+input[type="number"],
+select{
+  background:#fff;
+  border-color:#dfe7e2;
+}
+
+input[type="text"]:hover,
+input[type="number"]:hover,
+select:hover{
+  border-color:#bcd7c2;
+}
+
+/* 버튼 눌림 피드백 강화 */
+.btn{
+  transition:background .15s ease, transform .08s ease, box-shadow .15s ease;
+}
+
+.btn:hover{
+  filter:brightness(1.03);
+}
+
+.btn:active{
+  transform:translateY(1px);
+  box-shadow:0 1px 3px rgba(0,0,0,.12) inset;
+}
+
+/* ghost 버튼 고급화 */
+.btn.ghost{
+  background:#fff;
+}
+
+.btn.ghost:hover{
+  background:#f1f7f2;
+}
+
+/* 테이블 행 높이 안정 */
+.table td,
+.table th{
+  height:44px;
+}
+
+/* 체크박스 정렬 안정 */
+.checkbox-cell input{
+  transform:scale(1.05);
+}
+
+/* 그룹 박스 간 여백 */
+.group-box{
+  background:#fbfcfb;
+}
+
+/* 그룹 제목 강조 */
+.group-box > div:first-child{
+  font-size:14px;
+  margin-bottom:4px;
+}
+
+/* 타수 입력칸 시각 강조 */
+#scoreInputs input[type="number"]{
+  background:#fff;
+  font-weight:600;
+}
+
+/* 순위표 제목 통일 */
+#rankingArea h3{
+  font-size:15px;
+  margin-top:12px;
+}
+
+/* 순위표 테이블 행 강조 */
+#rankingArea tbody tr:hover{
+  background:#f4f7f9;
+}
+
+/* 모바일에서 카드 간 간격 */
+@media (max-width:420px){
+  .card{
+    padding:12px;
+  }
+}
+
+/* 테이블 전체 폭 제한 */
+#memberTable{
+  width:100%;
+  table-layout:fixed;
+}
+
+/* 테이블 컬럼 폭 지정 */
+#memberTable .checkbox-cell{
+  width:40px;
+}
+
+#memberTable .name-cell{
+  width:auto;
+}
+
+#memberTable th:nth-child(3){
+  width:80px;
+}
+
+#memberTable .action-cell{
+  width:80px;
+}
+
+/* 테이블 내부 요소 크기 제한 */
+#memberTable .name-input{
+  height:36px;
+  padding:6px 8px;
+  font-size:14px;
+  box-sizing:border-box;
+  width:100%;
+}
+
+#memberTable .gender-cell select{
+  height:36px;
+  padding:6px 8px;
+  box-sizing:border-box;
+  font-size:14px;
+}
+
+#memberTable .action-cell button{
+  height:36px;
+  padding:0;
+  box-sizing:border-box;
+  font-size:14px;
+  line-height:36px;
+  width:100%;
+}
+
+/* 테이블 셀 높이 고정 */
+#memberTable td{
+  height:48px;
+  vertical-align:middle;
+  padding:6px;
+}
+
+#memberTable th{
+  height:40px;
+  vertical-align:middle;
+  padding:8px 6px;
+  font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+<div class="container">
+  <div class="header">
+    <div class="title">경기운영 Ver.1.5</div>
+    <div class="madeby">Made by Kwon. S. D.</div>
+  </div>
+
+  <!-- 1) 그룹 및 회원관리 -->
+  <section class="card" id="memberSection">
+    <div class="h2">1) 그룹 및 회원관리</div>
+
+    <div class="row" style="margin-bottom:8px">
+      <select id="clubSelect" style="width:100%" onchange="onSelectClub()"></select>
+    </div>
+
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn ghost col" onclick="deleteClub()">그룹 삭제</button>
+      <button class="btn ghost col" onclick="resetCurrentClub()">그룹 초기화</button>
+    </div>
+
+    <div class="row" style="margin-bottom:8px">
+      <input id="inputName" class="name-input" style="max-width:160px" placeholder="회원 이름"/>
+      <select id="inputGender" style="width:90px">
+        <option value="남">남</option>
+        <option value="여">여</option>
+      </select>
+      <button class="btn" style="max-width:84px" onclick="addMember()">추가</button>
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="selectAll" type="checkbox" onchange="toggleSelectAll(this.checked)"/>
+        <label class="notice">전체선택</label>
+        <button class="btn small ghost" onclick="deleteSelected()">선택삭제</button>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="notice">회원수: <b id="totalCount">0</b></div>
+        <div class="notice">남: <b id="maleCount">0</b></div>
+        <div class="notice">여: <b id="femaleCount">0</b></div>
+      </div>
+    </div>
+
+    <table class="table" id="memberTable">
+      <thead>
+        <tr>
+          <th class="checkbox-cell"></th>
+          <th class="name-cell">이름</th>
+          <th>성별</th>
+          <th class="action-cell">삭제</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- 2) 조편성 -->
+  <section class="card" id="groupSection">
+    <div class="h2">2) 조편성</div>
+
+<div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:8px">
+  <div class="notice">선택 인원: <b id="selCount">0</b></div>
+  <div class="notice">남: <b id="selMale">0</b></div>
+  <div class="notice">여: <b id="selFemale">0</b></div>
+</div>
+
+
+
+
+    <div class="row" style="margin-bottom:8px;justify-content:space-between">
+      <div style="flex:1">
+        <label>조별인원</label>
+        <input id="groupSize" type="number" value="4" style="max-width:80px">
+      </div>
+<div style="flex:1">
+<div class="mode-row">
+  <span class="mode-label">방식</span>
+  <select id="mode" class="mode-select">
+    <option value="mixed">혼성</option>
+    <option value="byGender">성별</option>
+    <option value="random">무작위</option>
+  </select>
+</div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:8px;justify-content:flex-end">
+      <button class="btn" onclick="generateGroups()">조편성</button>
+      <button class="btn ghost" onclick="clearGroups()">초기화</button>
+      <button class="btn ghost" onclick="shareGroups()">공유</button>
+    </div>
+
+    <div id="groupsArea"></div>
+  </section>
+
+  <!-- 3) 타수 입력 -->
+  <section class="card" id="scoreSection">
+    <div class="h2">3) 타수 입력 (조별 순서)</div>
+    <div id="scoreInputs" class="notice">먼저 조편성을 실행하세요.</div>
+    <div style="margin-top:8px">
+      <button class="btn" style="width:100%" onclick="saveScores()">타수 저장 및 순위 계산</button>
+    </div>
+  </section>
+
+  <!-- 4) 순위표 -->
+  <section class="card" id="rankingSection">
+    <div class="h2">4) 순위표</div>
+    <div id="rankingArea"></div>
+
+<div style="margin-top:8px;display:flex;gap:8px;justify-content:center">
+      <button class="btn" onclick="applyLastHoleAndResort()">최종홀 적용</button>
+      <button class="btn ghost" onclick="copyRankingText()">순위 공유</button>
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+/* ================= storage keys ================= */
+const KEY_CLUBS = 'pg_clubs_v1_5_final';
+const KEY_GROUPS = 'pg_groups_v1_5_final';
+const KEY_SCORES = 'pg_scores_v1_5_final';
+
+let clubs = JSON.parse(localStorage.getItem(KEY_CLUBS) || '{}'); // {clubName: [{name, gender, checked}]}
+let groupsByClub = JSON.parse(localStorage.getItem(KEY_GROUPS) || '{}'); // {clubName: [ [name,...], ... ]}
+let scores = JSON.parse(localStorage.getItem(KEY_SCORES) || '{}'); // {clubName: {name: {total, lastHole}}}
+
+let currentClub = Object.keys(clubs)[0] || '__default__';
+if(!clubs[currentClub]) clubs[currentClub] = [];
+let groups = groupsByClub[currentClub] || [];
+
+function persistAll(){
+  localStorage.setItem(KEY_CLUBS, JSON.stringify(clubs));
+  localStorage.setItem(KEY_GROUPS, JSON.stringify(groupsByClub));
+  localStorage.setItem(KEY_SCORES, JSON.stringify(scores));
+}
+
+/* ================= utilities ================= */
+function escapeHTML(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function cssSafe(name){ 
+  return 'x'+Array.from(name).map(c=>c.charCodeAt(0).toString(16)).join('_'); 
+}
+
+/* ================= club select UI ================= */
+const clubSelect = document.getElementById('clubSelect');
+const memberTbody = document.querySelector('#memberTable tbody');
+
+function refreshClubSelect(){
+  clubSelect.innerHTML = '';
+  Object.keys(clubs).forEach(k=>{
+    const opt = document.createElement('option'); opt.value=k; opt.textContent=k; clubSelect.appendChild(opt);
+  });
+  const optNew = document.createElement('option'); optNew.value='__new__'; optNew.textContent='-- 그룹 선택/추가 --'; clubSelect.appendChild(optNew);
+  clubSelect.value = currentClub && clubs[currentClub] ? currentClub : '__new__';
+}
+
+function onSelectClub(){
+  const v = clubSelect.value;
+  if(v === '__new__'){
+    const name = prompt('새 그룹명 입력');
+    if(!name) { clubSelect.value = currentClub; return; }
+    if(!clubs[name]) clubs[name] = [];
+    if(!groupsByClub[name]) groupsByClub[name] = [];
+    groups = [];
+    scores[name] = {};
+    currentClub = name;
+    persistAll();
+    refreshClubSelect();
+    loadClubMembers(currentClub);
+    renderAll();
+    return;
+  }
+  saveMembersToClub();
+  currentClub = v;
+groups = [];                 // 조편성 초기화
+groupsByClub[currentClub] = [];
+scores[currentClub] = {};    // 타수 / 순위 초기화  
+
+loadClubMembers(currentClub);
+  renderAll();
+}
+
+function openNewClub(){
+  const name = prompt('새 클럽명을 입력하세요');
+  if(!name) return;
+  if(!clubs[name]) clubs[name] = [];
+  if(!groupsByClub[name]) groupsByClub[name] = [];
+  scores[name] = {};        // ✅ 타수/순위 완전 초기화
+  groups = [];              // ✅ 조편성 초기화
+  currentClub = name;
+  persistAll();
+  refreshClubSelect();
+  loadClubMembers(currentClub);
+  renderAll();
+  alert('클럽 추가: ' + name);
+}
+
+function deleteClub(){
+  if(!currentClub || currentClub==='__new__') return alert('삭제할 클럽을 선택하세요');
+  if(!confirm(currentClub + ' 클럽을 삭제하면 관련 데이터가 모두 삭제됩니다. 계속할까요?')) return;
+  delete clubs[currentClub];
+  delete groupsByClub[currentClub];
+  delete scores[currentClub];
+  currentClub = Object.keys(clubs)[0] || '__default__';
+  if(!clubs[currentClub]) clubs[currentClub] = [];
+  groups = groupsByClub[currentClub] || [];
+  persistAll();
+  refreshClubSelect();
+  loadClubMembers(currentClub);
+  renderAll();
+  alert('삭제 완료');
+}
+
+function resetCurrentClub(){
+  if(!currentClub || currentClub==='__new__') return alert('초기화할 클럽을 선택하세요');
+  if(!confirm(currentClub + ' 클럽의 멤버/조/점수를 초기화합니까?')) return;
+  clubs[currentClub] = [];
+  groupsByClub[currentClub] = [];
+  scores[currentClub] = {};
+  groups = [];
+  persistAll();
+  loadClubMembers(currentClub);
+  renderAll();
+  alert('초기화 완료');
+}
+
+/* ================= members ================= */
+function loadClubMembers(name){
+  const arr = clubs[name] || [];
+  // normalize structure (support older formats)
+  clubs[name] = arr.map(a => ({ name: a.name || a.n || '', gender: a.gender || a.g || '남', checked: !!a.checked }));
+  drawMembers();
+  updateCounts();
+}
+
+function saveMembersToClub(){
+  if(!currentClub || currentClub==='__new__') return;
+  const members = getMembersFromTable();
+  clubs[currentClub] = members.map(m=>({name:m.name, gender:m.gender, checked:m.checked}));
+  persistAll();
+}
+
+function getMembersFromTable(){
+  const rows = memberTbody.querySelectorAll('tr');
+  const res = [];
+  rows.forEach(tr=>{
+    const nameEl = tr.querySelector('input[data-name]');
+    const genderEl = tr.querySelector('select[data-gender]');
+    const chkEl = tr.querySelector('input[data-checked]');
+    if(!nameEl) return;
+    res.push({ name: nameEl.value.trim(), gender: genderEl.value, checked: chkEl.checked });
+  });
+  return res;
+}
+
+function drawMembers(){
+  memberTbody.innerHTML = '';
+  const arr = clubs[currentClub] || [];
+  arr.forEach((m,i)=>{
+    const tr = document.createElement('tr');
+    // show gender text before the dropdown, per request
+    tr.innerHTML = `
+      <td class="checkbox-cell"><input data-checked type="checkbox" ${m.checked?'checked':''} onchange="onMemberChecked(${i}, this.checked)"></td>
+      <td class="name-cell"><input data-name class="name-input" value="${escapeHTML(m.name)}" onchange="onMemberRename(${i}, this.value)"></td>
+      <td class="gender-cell">
+        <select data-gender onchange="onMemberGender(${i}, this.value)">
+
+
+          <option value="남" ${m.gender==='남'?'selected':''}>남</option>
+          <option value="여" ${m.gender==='여'?'selected':''}>여</option>
+        </select>
+      </td>
+      <td class="action-cell"><button class="btn small ghost" onclick="deleteMember(${i})">삭제</button></td>
+    `;
+    memberTbody.appendChild(tr);
+  });
+  updateCounts();
+}
+
+function onMemberChecked(i,val){ clubs[currentClub][i].checked = val; persistAll(); updateCounts(); }
+function onMemberRename(i,val){ if(!val.trim()) return alert('이름을 비워둘 수 없습니다'); clubs[currentClub][i].name = val.trim(); persistAll(); drawGroups(); drawScoreInputs(); renderRanks(); }
+function onMemberGender(i,val){ clubs[currentClub][i].gender = val; persistAll(); drawGroups(); drawScoreInputs(); renderRanks(); }
+function deleteMember(i){ if(!confirm('삭제하시겠습니까?')) return; const name = clubs[currentClub][i].name; clubs[currentClub].splice(i,1); if(scores[currentClub] && scores[currentClub][name]) delete scores[currentClub][name]; persistAll(); drawMembers(); drawGroups(); drawScoreInputs(); updateCounts(); }
+
+function toggleSelectAll(checked){ (clubs[currentClub]||[]).forEach(m=>m.checked = checked); persistAll(); drawMembers(); updateCounts(); }
+function deleteSelected(){ if(!confirm('선택한 회원을 모두 삭제하시겠습니까?')) return; clubs[currentClub] = (clubs[currentClub]||[]).filter(m=>!m.checked); persistAll(); drawMembers(); drawGroups(); drawScoreInputs(); updateCounts(); }
+
+document.getElementById('inputName').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addMember(); });
+function addMember(){
+  const name = document.getElementById('inputName').value.trim();
+  const gender = document.getElementById('inputGender').value;
+  if(!name) return alert('이름을 입력하세요');
+  if((clubs[currentClub]||[]).some(m=>m.name === name)) return alert('같은 이름이 존재합니다.');
+  clubs[currentClub].push({ name, gender, checked:false });
+  persistAll();
+  document.getElementById('inputName').value = '';
+  drawMembers();
+  updateCounts();
+}
+
+/* ================= grouping (rules per request) ================= */
+/* computeGroupSizes(N,S) -> returns sizes array or null */
+function computeGroupSizes(N,S){
+  for(let g=1; g<=N; g++){
+    const a = N - g*(S-1);
+    if(a>=0 && a<=g){
+      const sizes = [];
+      for(let i=0;i<g;i++) sizes.push(i<a?S:(S-1));
+      return sizes;
+    }
+  }
+  return null;
+}
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+}
+
+/* generateGroups ... (unchanged) */
+function generateGroups(){
+  const selected = (clubs[currentClub] || []).filter(m=>m.checked);
+  const N = selected.length;
+  if(N===0) return alert('조편성 대상(선택된 회원)이 없습니다.');
+  const S = Math.max(1, Number(document.getElementById('groupSize').value) || 4);
+  const mode = document.getElementById('mode').value;
+  const sizes = computeGroupSizes(N, S);
+  if(!sizes) return alert('조편성 불가: 선택 인원 ' + N + '명은 조별인원 규칙으로 나눌 수 없습니다.');
+  const G = sizes.length;
+  const pool = selected.slice();
+  shuffleArray(pool);
+
+  if(mode === 'byGender'){
+    let males = pool.filter(p=>p.gender==='남').slice();
+    let females = pool.filter(p=>p.gender==='여').slice();
+    const maleSizes = computeGroupSizes(males.length, S);
+    const femaleSizes = computeGroupSizes(females.length, S);
+    if(!maleSizes || !femaleSizes) return alert('성별로 따로 편성 불가: 남자 또는 여자 인원이 규칙을 만족하지 않습니다.');
+    const newGroups = [];
+    maleSizes.forEach(sz => newGroups.push(males.splice(0, sz).map(x=>x.name)));
+    femaleSizes.forEach(sz => newGroups.push(females.splice(0, sz).map(x=>x.name)));
+    groups = newGroups.map(g=>g.slice());
+  } else if(mode === 'mixed'){
+    const caps = sizes.slice();
+    const groupsArr = Array.from({length:caps.length}, ()=>[]);
+    const females = pool.filter(p=>p.gender==='여').slice();
+    const males = pool.filter(p=>p.gender==='남').slice();
+    let gi = 0;
+    females.forEach(f=>{
+      let tries = 0;
+      while(caps[gi] <= 0 && tries < caps.length){ gi = (gi+1)%caps.length; tries++; }
+      if(caps[gi] > 0){ groupsArr[gi].push(f.name); caps[gi]--; gi = (gi+1)%caps.length; }
+      else { for(let j=0;j<caps.length;j++) if(caps[j]>0){ groupsArr[j].push(f.name); caps[j]--; break; } }
+    });
+    let mIdx = 0;
+    for(let j=0;j<caps.length;j++){
+      while(caps[j] > 0 && mIdx < males.length){
+        groupsArr[j].push(males[mIdx].name); mIdx++; caps[j]--;
+      }
+    }
+    while(mIdx < males.length){
+      let placed = false;
+      for(let j=0;j<groupsArr.length;j++){
+        if(groupsArr[j].length < sizes[j]){ groupsArr[j].push(males[mIdx].name); mIdx++; placed = true; break; }
+      }
+      if(!placed) break;
+    }
+    groups = groupsArr.map(g=>g.slice());
+  } else {
+    const groupsArr = [];
+    let idx = 0;
+    for(let gi=0; gi<sizes.length; gi++){
+      groupsArr[gi] = pool.slice(idx, idx+sizes[gi]).map(p=>p.name);
+      idx += sizes[gi];
+    }
+    groups = groupsArr.map(g=>g.slice());
+  }
+
+  groupsByClub[currentClub] = groups.slice();
+  scores[currentClub] = {};
+  persistAll();
+  drawGroups();
+  drawScoreInputs();
+  renderRanks();
+}
+
+function drawGroups(){
+  const area = document.getElementById('groupsArea');
+  area.innerHTML = '';
+  if(!groups || groups.length === 0){ area.innerHTML = '<div class="notice">편성된 조가 없습니다.</div>'; return; }
+  groups.forEach((g, gi)=>{
+    const div = document.createElement('div'); div.className = 'group-box';
+    let inner = `<div style="font-weight:700">${gi+1}조 (인원:${g.length})</div><ul style="text-align:left;padding-left:18px;margin:6px 0">`;
+    g.forEach(n => {
+      const mem = (clubs[currentClub] || []).find(m => m.name === n) || {gender:'-'};
+      inner += `<li>${escapeHTML(n)} <small style="color:var(--muted)">(${mem.gender})</small></li>`;
+    });
+    inner += '</ul>';
+    div.innerHTML = inner;
+    area.appendChild(div);
+  });
+}
+
+function clearGroups(){
+  if(!confirm('편성 초기화: 조편성, 타수 입력, 순위표를 모두 초기화합니다. 계속할까요?')) return;
+  groups = [];
+  groupsByClub[currentClub] = [];
+  scores[currentClub] = scores[currentClub] || {};
+  persistAll();
+  drawGroups();
+  drawScoreInputs();
+  renderRanks();
+}
+
+/* ================= score inputs (total) ================= */
+function drawScoreInputs(){
+  const el = document.getElementById('scoreInputs'); el.innerHTML = '';
+  if(!groups || groups.length === 0){ el.innerHTML = '<div class="notice">먼저 조편성을 실행하세요.</div>'; return; }
+  if(!scores[currentClub]) scores[currentClub] = {};
+  groups.forEach((g, gi) => {
+    const box = document.createElement('div'); box.className = 'group-box';
+    let inner = `<div style="font-weight:700">${gi+1}조</div>`;
+    g.forEach(name => {
+      const mem = (clubs[currentClub] || []).find(m => m.name === name) || {gender:'-'};
+      const totalVal = (scores[currentClub] && scores[currentClub][name] && scores[currentClub][name].total != null) ? scores[currentClub][name].total : '';
+      inner += `<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><div style="flex:1">${escapeHTML(name)} <small style="color:var(--muted)">(${mem.gender})</small></div><input id="inp_total_${cssSafe(name)}" type="number" placeholder="총타수" value="${totalVal}" style="width:120px"/></div>`;
+    });
+    box.innerHTML = inner;
+    el.appendChild(box);
+  });
+}
+
+/* fix saveScores: explicitly ensure scores[currentClub] exists and only parse numeric values */
+function saveScores(){
+  if(!scores[currentClub]) scores[currentClub] = {};
+  const inGroup = new Set(groups.flat());
+  groups.flat().forEach(name=>{
+    const el = document.getElementById('inp_total_'+cssSafe(name));
+    if(el){
+      const raw = (el.value||'').toString().trim();
+      scores[currentClub][name] = scores[currentClub][name] || {};
+      if(raw !== ''){
+        const v = Number(raw);
+        if(!Number.isNaN(v)){
+          scores[currentClub][name].total = v;
+        } else {
+          scores[currentClub][name].total = null;
+        }
+      } else {
+        scores[currentClub][name].total = null;
+      }
+    }
+  });
+  // remove scores not in group
+  Object.keys(scores[currentClub] || {}).forEach(k => { if(!inGroup.has(k)) delete scores[currentClub][k]; });
+  persistAll();
+  renderRanks();
+  alert('타수 저장 완료');
+}
+
+/* ================= ranking logic (total asc, then lastHole asc) ================= */
+function renderRanks(){
+  const area = document.getElementById('rankingArea'); area.innerHTML = '';
+  if(!groups || groups.length === 0) return area.innerHTML = '<div class="notice">조편성이 필요합니다.</div>';
+
+// ✅ 타수 입력 전에는 순위표 숨김
+if(
+  !scores[currentClub] ||
+  Object.values(scores[currentClub]).every(
+    s => s.total == null || s.total === ''
+  )
+){
+  return area.innerHTML =
+    '<div class="notice">타수 입력 후 순위표가 표시됩니다.</div>';
+}
+
+  const players = groups.flat().map(name => {
+    const mem = (clubs[currentClub] || []).find(m => m.name === name);
+    const sc = (scores[currentClub] && scores[currentClub][name]) || {};
+    return { name, gender: mem ? mem.gender : '-', total: sc.total != null ? Number(sc.total) : null, lastHole: sc.lastHole != null ? Number(sc.lastHole) : null };
+  });
+
+  function cmp(a,b){
+    const at = a.total == null ? Infinity : a.total;
+    const bt = b.total == null ? Infinity : b.total;
+    if(at !== bt) return at - bt;
+    const al = a.lastHole == null ? Infinity : a.lastHole;
+    const bl = b.lastHole == null ? Infinity : b.lastHole;
+    if(al !== bl) return al - bl;
+    return a.name.localeCompare(b.name,'ko');
+  }
+
+  const allSorted = players.slice().sort(cmp);
+  const menSorted = allSorted.filter(p=>p.gender === '남');
+  const womenSorted = allSorted.filter(p=>p.gender === '여');
+
+function assignRanks(list){
+  const ranks = {};
+  let prev = null;
+  let rank = 0;
+  let displayRank = 0;
+
+  list.forEach(p=>{
+    // ✅ 총타수가 없으면 순위도 공란
+    if(p.total == null){
+      ranks[p.name] = '';
+      return;
+    }
+
+    rank++;
+    const key = p.total + '|' + (p.lastHole == null ? '' : p.lastHole);
+    if(prev !== key){
+      displayRank = rank;
+      prev = key;
+    }
+    ranks[p.name] = displayRank;
+  });
+  return ranks;
+}
+
+  const overallRanks = assignRanks(allSorted);
+  const maleRanks = assignRanks(menSorted);
+  const femaleRanks = assignRanks(womenSorted);
+
+  let html = '<div style="overflow:auto">';
+  html += '<h3 style="margin-bottom:6px">▶ 남자부</h3><table><thead><tr><th>순위</th><th>이름</th><th>총타수</th><th>통합순위</th></tr></thead><tbody>';
+  menSorted.forEach(p=>{ const t = p.total==null ? '' : p.total; html += `<tr><td>${maleRanks[p.name]}</td><td>${escapeHTML(p.name)}</td><td>${t}</td><td>${overallRanks[p.name]}</td></tr>`; });
+  html += '</tbody></table>';
+
+  html += '<h3 style="margin-top:10px;margin-bottom:6px">▶ 여자부</h3><table><thead><tr><th>순위</th><th>이름</th><th>총타수</th><th>통합순위</th></tr></thead><tbody>';
+  womenSorted.forEach(p=>{ const t = p.total==null ? '' : p.total; html += `<tr><td>${femaleRanks[p.name]}</td><td>${escapeHTML(p.name)}</td><td>${t}</td><td>${overallRanks[p.name]}</td></tr>`; });
+  html += '</tbody></table>';
+
+  html += '<h3 style="margin-top:10px;margin-bottom:6px">▶ 남녀 통합</h3><table><thead><tr><th>순위</th><th>이름</th><th>총타수</th><th>최종홀</th></tr></thead><tbody>';
+  allSorted.forEach(p=>{
+    const t = p.total==null ? '' : p.total;
+    const l = p.lastHole==null ? '' : p.lastHole;
+    html += `<tr><td>${overallRanks[p.name]}</td><td style="text-align:left;padding-left:8px">${escapeHTML(p.name)} <small style="color:var(--muted)">(${p.gender})</small></td><td>${t}</td><td><input type="number" data-last="${encodeURIComponent(p.name)}" value="${l}" style="width:84px"/></td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  // removed inner "최종홀 저장" button as requested (we keep header-level apply button)
+  area.innerHTML = html;
+}
+
+/* save lastHole inputs & re-render (lastHole used as tiebreaker when sorting) */
+function applyLastHoleInputs(){
+  if(!scores[currentClub]) scores[currentClub] = {};
+  const inputs = document.querySelectorAll('#rankingArea input[data-last]');
+  inputs.forEach(inp=>{
+    const name = decodeURIComponent(inp.getAttribute('data-last'));
+    const v = inp.value.trim();
+    scores[currentClub][name] = scores[currentClub][name] || {};
+    scores[currentClub][name].lastHole = v !== '' ? Number(v) : null;
+  });
+  persistAll();
+  alert('최종홀 저장 완료');
+  renderRanks();
+}
+function applyLastHoleAndResort(){ applyLastHoleInputs(); }
+
+/* ================= sharing ================= */
+function shareGroups(){
+  if(!groups || groups.length === 0) return alert('공유할 조편성 결과가 없습니다.');
+  let text = '[조편성 결과]\\n';
+  groups.forEach((g,i)=> {
+    text += `${i+1}조: ` + g.map(n => {
+      const mem = (clubs[currentClub]||[]).find(m=>m.name===n);
+      return `${n}(${mem?mem.gender:''})`;
+    }).join(', ') + '\\n';
+  });
+  if(navigator.share){
+    navigator.share({ title: '조편성 결과', text }).catch(()=> {
+      navigator.clipboard.writeText(text).then(()=> alert('공유 실패 — 클립보드에 복사됨'));
+    });
+  } else {
+    navigator.clipboard.writeText(text).then(()=> alert('클립보드에 복사됨 — 원하는 앱에 붙여넣기'));
+  }
+}
+
+/* ================= CSV / copy ================= */
+
+function copyRankingText(){
+  if(!groups || groups.length===0) return alert('순위표가 없습니다.');
+  
+  // 정렬 함수 (총타수 -> 최종홀 -> 이름 순)
+  function sortPlayers(players){
+    return players.sort((a,b)=>{
+      const at = a.total == null ? Infinity : a.total;
+      const bt = b.total == null ? Infinity : b.total;
+      if(at !== bt) return at - bt;
+      const al = a.lastHole == null ? Infinity : a.lastHole;
+      const bl = b.lastHole == null ? Infinity : b.lastHole;
+      if(al !== bl) return al - bl;
+      return a.name.localeCompare(b.name,'ko');
+    });
+  }
+  
+  // 동점자 처리 순위 부여 함수
+  function assignRank(list){
+    const ranked = [];
+    let prev = null;
+    let rank = 0;
+    let displayRank = 0;
+    
+    list.forEach(p=>{
+      rank++;
+      const key = p.total + '|' + (p.lastHole == null ? '' : p.lastHole);
+      if(prev !== key){
+        displayRank = rank;
+        prev = key;
+      }
+      ranked.push({...p, rank: displayRank});
+    });
+    return ranked;
+  }
+  
+  let text = '[순위표 결과]\n\n';
+  
+  // 전체 플레이어 데이터 수집
+  const allPlayers = groups.flat().map(n=>{
+    const mem = (clubs[currentClub]||[]).find(m=>m.name===n);
+    const sc = (scores[currentClub] && scores[currentClub][n]) || {};
+    return {
+      name: n,
+      gender: mem ? mem.gender : '-',
+      total: sc.total != null ? Number(sc.total) : null,
+      lastHole: sc.lastHole != null ? Number(sc.lastHole) : null
+    };
+  }).filter(p=>p.total!=null);
+  
+  // 남자부
+  const men = allPlayers.filter(p=>p.gender==='남');
+  const menSorted = sortPlayers(men.slice());
+  const menRanked = assignRank(menSorted);
+  
+  if(menRanked.length > 0){
+    text += '▶ 남자부\n';
+    menRanked.forEach(p=>{
+      const lastHoleText = p.lastHole != null ? `, 최종홀:${p.lastHole}` : '';
+      text += `${p.rank}위: ${p.name} (${p.total}타${lastHoleText})\n`;
+    });
+    text += '\n';
+  }
+  
+  // 여자부
+  const women = allPlayers.filter(p=>p.gender==='여');
+  const womenSorted = sortPlayers(women.slice());
+  const womenRanked = assignRank(womenSorted);
+  
+  if(womenRanked.length > 0){
+    text += '▶ 여자부\n';
+    womenRanked.forEach(p=>{
+      const lastHoleText = p.lastHole != null ? `, 최종홀:${p.lastHole}` : '';
+      text += `${p.rank}위: ${p.name} (${p.total}타${lastHoleText})\n`;
+    });
+    text += '\n';
+  }
+  
+  // 통합
+  const allSorted = sortPlayers(allPlayers.slice());
+  const allRanked = assignRank(allSorted);
+  
+  if(allRanked.length > 0){
+    text += '▶ 남녀 통합\n';
+    allRanked.forEach(p=>{
+      const lastHoleText = p.lastHole != null ? `, 최종홀:${p.lastHole}` : '';
+      text += `${p.rank}위: ${p.name} (${p.gender}) (${p.total}타${lastHoleText})\n`;
+    });
+  }
+  
+  if(navigator.share){
+    navigator.share({ title: '순위표 결과', text }).catch(()=>{
+      navigator.clipboard.writeText(text).then(()=>alert('공유 실패 — 클립보드에 복사됨'));
+    });
+  } else {
+    navigator.clipboard.writeText(text).then(()=>alert('클립보드에 복사됨 — 원하는 앱에 붙여넣기'));
+  }
+}
+
+/* ================= helper: render all ================= */
+function renderAll(){ drawMembers(); drawGroups(); drawScoreInputs(); renderRanks(); updateCounts(); }
+function loadClubInitial(){
+  refreshClubSelect();
+  if(!clubs[currentClub]) clubs[currentClub] = [];
+  if(!groupsByClub[currentClub]) groupsByClub[currentClub] = [];
+  if(!scores[currentClub]) scores[currentClub] = {};
+  groups = groupsByClub[currentClub] || [];
+  drawMembers();
+  drawGroups();
+  drawScoreInputs();
+  renderRanks();
+  updateCounts();
+}
+
+function updateCounts(){
+  const arr = clubs[currentClub] || [];
+  const total = arr.length;
+  const male = arr.filter(x=>x.gender==='남').length;
+  const female = arr.filter(x=>x.gender==='여').length;
+  document.getElementById('totalCount').innerText = total;
+  document.getElementById('maleCount').innerText = male;
+  document.getElementById('femaleCount').innerText = female;
+const checkedMembers = arr.filter(x=>x.checked);
+
+const checked = checkedMembers.length;
+const maleChecked = checkedMembers.filter(x=>x.gender === '남').length;
+const femaleChecked = checkedMembers.filter(x=>x.gender === '여').length;
+
+document.getElementById('selCount').innerText = checked;
+document.getElementById('selMale').innerText = maleChecked;
+document.getElementById('selFemale').innerText = femaleChecked;
+
+document.getElementById('selectAll').checked =
+  (arr.length > 0 && checked === arr.length);
+}
+
+refreshClubSelect();
+loadClubInitial();
+
+/* Ensure saveMembersToClub is called before unload */
+window.addEventListener('beforeunload', ()=>{ saveMembersToClub(); persistAll(); });
+
+</script>
+</body>
+</html>
