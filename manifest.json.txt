@@ -1,8 +1,9 @@
 {
   "name": "파크골프 경기운영",
   "short_name": "파크골프",
-  "start_url": "./index.html",
+  "start_url": "/park-golf/",
+  "scope": "/park-golf/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2e7d32"
+  "theme_color": "#2e7d32",
+  "background_color": "#ffffff"
 }
