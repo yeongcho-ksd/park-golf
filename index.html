@@ -1181,8 +1181,50 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
+<script>
+let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = "block";
+});
+
+installBtn.addEventListener("click", async () => {
+  installBtn.style.display = "none";
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+</script>
+
+<script>
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.style.display = "none";
+}
+</script>
+
+<button id="installBtn" style="
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:14px 20px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:#2e7d32;
+  color:white;
+  z-index:9999;
+">
+📲 앱 설치
+</button>
+
 </body>
 </html>
+
 
 
 
